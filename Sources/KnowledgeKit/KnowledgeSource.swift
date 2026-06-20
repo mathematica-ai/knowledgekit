@@ -2,7 +2,7 @@ import Foundation
 
 /// A place KnowledgeKit can fetch records from. Implementations never hold
 /// privileged Knowledge-backend credentials — they talk to a published snapshot,
-/// a bearer-gated proxy, or a bundled file. (The privileged P1/Polymorph creds
+/// a bearer-gated proxy, or a bundled file. (The privileged P1/Knowledge creds
 /// stay server-side, per the backend's `server-only` contract.)
 public protocol KnowledgeSource: Sendable {
     func fetch() async throws -> [KnowledgeRecord]

@@ -8,7 +8,7 @@ A small, dependency-free Swift package that pulls knowledge records from a snaps
 
 ## Why
 
-On-device LLM flows need their grounding corpus **on the device**. But the privileged Knowledge-backend credentials (P1 / Polymorph: `P1_API_URL`, `P1_API_KEY`, org/project slugs) are `server-only` and must never ship in an app binary. KnowledgeKit is built around that constraint: it never holds those creds — it fetches from a **published snapshot** or a **bearer-gated proxy** (narrow token), then caches locally.
+On-device LLM flows need their grounding corpus **on the device**. But the privileged Knowledge-backend credentials (P1 / Knowledge: `P1_API_URL`, `P1_API_KEY`, org/project slugs) are `server-only` and must never ship in an app binary. KnowledgeKit is built around that constraint: it never holds those creds — it fetches from a **published snapshot** or a **bearer-gated proxy** (narrow token), then caches locally.
 
 ## Install
 
@@ -72,8 +72,8 @@ struct KnowledgeRecord: Codable, Sendable, Identifiable {
 
 ## Security note
 
-KnowledgeKit deliberately has no notion of the privileged Knowledge backend. Keep `P1_API_KEY` / Polymorph credentials server-side; expose the corpus to the device as a static snapshot or behind a narrow, bearer-gated endpoint.
+KnowledgeKit deliberately has no notion of the privileged Knowledge backend. Keep `P1_API_KEY` / Knowledge credentials server-side; expose the corpus to the device as a static snapshot or behind a narrow, bearer-gated endpoint.
 
 ## License
 
-[Apache License 2.0](LICENSE). KnowledgeKit is unofficial and not affiliated with Langflow / DataStax / Polymorph — see [NOTICE](NOTICE).
+[Apache License 2.0](LICENSE). KnowledgeKit is unofficial and not affiliated with Langflow / DataStax / Knowledge — see [NOTICE](NOTICE).

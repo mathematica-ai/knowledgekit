@@ -52,7 +52,7 @@ Include both brand-policy chunks **and** the statutory/legal text (EU 2019/771, 
 
 ## Suggested server endpoint
 
-The privileged P1/Polymorph creds are `server-only`, so the export must be produced server-side. Add a narrow, bearer-gated route on the complaint-manager (mirrors the existing `/api/agent/complaints/triage` auth — the app already carries `SYW_COMPLAINT_API_KEY`):
+The privileged P1/Knowledge creds are `server-only`, so the export must be produced server-side. Add a narrow, bearer-gated route on the complaint-manager (mirrors the existing `/api/agent/complaints/triage` auth — the app already carries `SYW_COMPLAINT_API_KEY`):
 
 ```
 GET /api/agent/knowledge/export
