@@ -2,7 +2,7 @@
 
 > Fetch a knowledge corpus (brand policies, FAQs, statutory text) and cache it **on-device** for fully-offline retrieval.
 
-A small, dependency-free Swift package that pulls knowledge records from a snapshot, a bearer-gated proxy, or a search endpoint, persists them locally, and hands them back for on-device RAG. Pairs with [LangflowKit](https://github.com/mathematica-ai/langflowkit)'s retriever, but depends on nothing.
+A small, dependency-free Swift package that pulls knowledge records from a snapshot, a bearer-gated proxy, or a search endpoint, persists them locally, and hands them back for on-device RAG. Pairs with [FlowKit](https://github.com/mathematica-ai/flowkit)'s retriever, but depends on nothing.
 
 > Built & tested on Swift 6.3 / Xcode 26. 10 tests, no external dependencies.
 
@@ -44,12 +44,12 @@ let records = try await store.records()          // [KnowledgeRecord]
 | `SearchKnowledgeSource(endpoint:queries:topK:)` | The backend only exposes search — harvest the corpus by querying with seed queries and de-duplicating chunks. |
 | `BundledKnowledgeSource(data:)` | Ship a seed JSON in-app as the offline default before any sync. |
 
-### Bridge to LangflowKit's retriever
+### Bridge to FlowKit's retriever
 
-`KnowledgeRecord` maps 1:1 to LangflowKit's `KnowledgeDocument`:
+`KnowledgeRecord` maps 1:1 to FlowKit's `KnowledgeDocument`:
 
 ```swift
-import LangflowKit
+import FlowKit
 
 let docs = try await store.records().map {
     KnowledgeDocument(id: $0.id, text: $0.text, metadata: $0.metadata)
