@@ -47,7 +47,7 @@ final class KnowledgeStoreTests: XCTestCase {
         let isEmpty = await store.isEmpty
         XCTAssertTrue(isEmpty)
         let records = [
-            KnowledgeRecord(id: "a", text: "alpha", metadata: ["brand": "Maje"]),
+            KnowledgeRecord(id: "a", text: "alpha", metadata: ["brand": "Acme"]),
             KnowledgeRecord(id: "b", text: "beta"),
         ]
         try await store.save(records, sourceLabel: "unit")
@@ -80,10 +80,10 @@ final class KnowledgeStoreTests: XCTestCase {
 
 final class KnowledgeDecodeTests: XCTestCase {
     func testDecodesBareArray() throws {
-        let json = #"[{"id":"a","text":"alpha","metadata":{"brand":"Maje"}}]"#
+        let json = #"[{"id":"a","text":"alpha","metadata":{"brand":"Acme"}}]"#
         let records = try SnapshotKnowledgeSource.decodeRecords(Data(json.utf8))
         XCTAssertEqual(records.count, 1)
-        XCTAssertEqual(records.first?.metadata["brand"], "Maje")
+        XCTAssertEqual(records.first?.metadata["brand"], "Acme")
     }
 
     func testDecodesRecordsWrapper() throws {
@@ -94,7 +94,7 @@ final class KnowledgeDecodeTests: XCTestCase {
 
     func testExtractsFromSearchShape() throws {
         // MCP-style: { result: { chunks: [ { chunk_id, content, metadata } ] } }
-        let json = #"{"query":"q","result":{"chunks":[{"chunk_id":"c1","content":"Maje 2-year guarantee","metadata":{"country":"FR"}}]}}"#
+        let json = #"{"query":"q","result":{"chunks":[{"chunk_id":"c1","content":"Acme 2-year guarantee","metadata":{"country":"FR"}}]}}"#
         let records = try SnapshotKnowledgeSource.decodeRecords(Data(json.utf8))
         XCTAssertEqual(records.count, 1)
         XCTAssertEqual(records.first?.id, "c1")
@@ -134,7 +134,7 @@ final class KnowledgeNetworkTests: XCTestCase {
         }
         let source = SearchKnowledgeSource(
             endpoint: endpoint,
-            queries: ["Maje defect FR", "Maje return FR"],
+            queries: ["Acme defect FR", "Acme return FR"],
             topK: 5,
             session: stubSession()
         )

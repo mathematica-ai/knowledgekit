@@ -1,6 +1,6 @@
 # Knowledge snapshot — export format & endpoint
 
-This is the contract KnowledgeKit's `SnapshotKnowledgeSource` consumes: a single JSON document that is the **full corpus**, fetched once and cached on-device. It's how you replace a bundled seed with the real Knowledge 314 corpus without touching app code.
+This is the contract KnowledgeKit's `SnapshotKnowledgeSource` consumes: a single JSON document that is the **full corpus**, fetched once and cached on-device. It's how you replace a bundled seed with your real knowledge-base corpus without touching app code.
 
 ## The JSON shape
 
@@ -10,16 +10,16 @@ Any of these are accepted (the bare array is canonical):
 // 1. canonical — a bare array of records
 [
   {
-    "id": "maje-fr-manufacturing-defect",      // stable, unique; KnowledgeKit de-dupes on it
-    "text": "Maje France: 2-year legal guarantee of conformity…",
+    "id": "acme-fr-manufacturing-defect",      // stable, unique; KnowledgeKit de-dupes on it
+    "text": "Acme France: 2-year legal guarantee of conformity…",
     "metadata": {                                // all optional, all string→string
-      "brand": "Maje",
+      "brand": "Acme",
       "country": "FR",
       "issue": "manufacturing-defect",
-      "source_url": "https://fr.maje.com/…/terms-2025.html",
+      "source_url": "https://example.com/terms-2025.html",
       "last_updated": "2026-04-10"
     },
-    "source": "knowledge-314"                    // optional provenance label
+    "source": "knowledge-cms"                    // optional provenance label
   }
 ]
 ```
@@ -32,35 +32,35 @@ Any of these are accepted (the bare array is canonical):
 > If your backend emits a different shape, KnowledgeKit's tolerant extractor will still lift any object carrying a text-like field (`text` / `content` / `chunk` / `page_content` / …). But emitting the canonical shape above is strongly preferred — it's lossless and predictable.
 
 Field rules:
-- **`id`** — required, stable across exports (so re-syncs are idempotent). Use the Knowledge chunk/KUI id.
+- **`id`** — required, stable across exports (so re-syncs are idempotent). Use your backend's chunk/document id.
 - **`text`** — required, the chunk content the retriever embeds.
 - **`metadata`** — optional `string → string`. Put facets the agent queries on here (`brand`, `country`, `issue`, `source_url`). Non-string values are dropped.
 - **`source`** — optional label for provenance/debugging.
 
-## Mapping Knowledge 314 → records
+## Mapping a knowledge backend → records
 
-For each chunk/KUI in the Knowledge 314 project (`save-your-wardrobe-ltd/complaints-manager`):
+For each chunk/document in your knowledge backend (CMS, vector store, docs pipeline):
 
-| Knowledge 314 | → `KnowledgeRecord` |
+| Backend concept | → `KnowledgeRecord` |
 |---|---|
-| chunk id / KUI id | `id` |
+| chunk id / document id | `id` |
 | chunk content | `text` |
-| brand / category / geography / issue type | `metadata.brand` / `…country` / `…issue` |
+| facets (brand / category / geography / topic) | `metadata.brand` / `…country` / `…issue` |
 | source document URL | `metadata.source_url` |
 
-Include both brand-policy chunks **and** the statutory/legal text (EU 2019/771, French Civil Code, etc.) so on-device grounding matches the server flow.
+Include every corpus the on-device agent should ground on (e.g. brand/product policy **and** any statutory or reference text relevant to your domain) so on-device grounding matches your server flow.
 
 ## Suggested server endpoint
 
-The privileged P1/Knowledge creds are `server-only`, so the export must be produced server-side. Add a narrow, bearer-gated route on the complaint-manager (mirrors the existing `/api/agent/complaints/triage` auth — the app already carries `SYW_COMPLAINT_API_KEY`):
+If your knowledge backend's credentials are server-only, produce the export server-side. Add a narrow, bearer-gated route on your backend:
 
 ```
-GET /api/agent/knowledge/export
-Authorization: Bearer <SYW_COMPLAINT_API_KEY>
+GET /api/knowledge/export
+Authorization: Bearer <API_TOKEN>
 → 200 { "records": [ … ], "version": "2026-06-20", "count": 412 }
 ```
 
-Server-side it enumerates Knowledge 314 (via the same MCP/P1 path the retriever uses) and serializes every chunk to the format above. Cache it (it changes rarely) and optionally support:
+Server-side it enumerates the knowledge base and serializes every chunk to the format above. Cache it (it changes rarely) and optionally support:
 - `ETag` / `If-None-Match` → `304 Not Modified` so the device skips re-downloading an unchanged corpus.
 - `?updated_since=YYYY-MM-DD` for incremental syncs.
 
@@ -69,13 +69,13 @@ Alternatively, publish a **static snapshot** (a versioned JSON in object storage
 ## Device side
 
 ```swift
-let store = try KnowledgeStore(name: "complaints")
+let store = try KnowledgeStore(name: "corpus")
 try await store.sync(from: SnapshotKnowledgeSource(
-    url: URL(string: "https://syw-complaint-manager.mathematica.ai/api/agent/knowledge/export")!,
-    bearerToken: agentToken
+    url: URL(string: "https://api.example.com/api/knowledge/export")!,
+    bearerToken: apiToken
 ))
 // thereafter, fully offline:
 let records = try await store.records()
 ```
 
-In the SYW showcase app this is already abstracted behind `KnowledgeProvider`: it seeds from the bundled corpus today, and flipping to the snapshot is a one-line `syncSnapshot(url:bearerToken:)` call once this endpoint exists.
+In a consuming app, abstract this behind a small provider type: seed from a bundled corpus on first run, and flipping to the live snapshot is a one-line `sync(from:)` call once the endpoint exists.
